@@ -330,8 +330,6 @@ def test_detect_all_patterns_multiple():
     ]
     patterns = detect_all_patterns(candles)
     assert isinstance(patterns, list)
-    # Should detect at least one pattern
-    assert len(patterns) >= 0
 
 
 def test_detect_all_patterns_empty():

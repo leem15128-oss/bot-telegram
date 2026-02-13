@@ -142,7 +142,6 @@ def detect_long_legged_doji(candles: List[Dict], atr: Optional[float] = None) ->
         return {'detected': False, 'type': 'long_legged_doji'}
     
     candle = candles[-1]
-    body = get_body_size(candle)
     range_size = get_range_size(candle)
     upper_shadow = get_upper_shadow(candle)
     lower_shadow = get_lower_shadow(candle)
@@ -182,7 +181,6 @@ def detect_dragonfly_doji(candles: List[Dict], atr: Optional[float] = None) -> D
         return {'detected': False, 'type': 'dragonfly_doji'}
     
     candle = candles[-1]
-    body = get_body_size(candle)
     range_size = get_range_size(candle)
     upper_shadow = get_upper_shadow(candle)
     lower_shadow = get_lower_shadow(candle)
@@ -221,7 +219,6 @@ def detect_gravestone_doji(candles: List[Dict], atr: Optional[float] = None) -> 
         return {'detected': False, 'type': 'gravestone_doji'}
     
     candle = candles[-1]
-    body = get_body_size(candle)
     range_size = get_range_size(candle)
     upper_shadow = get_upper_shadow(candle)
     lower_shadow = get_lower_shadow(candle)
