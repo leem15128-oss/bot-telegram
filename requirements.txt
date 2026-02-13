@@ -1,0 +1,3 @@
+# Core dependencies - keeping minimal as per requirements
+# No heavy dependencies, pure Python approach
+pytest>=7.4.0
