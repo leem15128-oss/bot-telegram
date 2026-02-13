@@ -1,0 +1,23 @@
+[Unit]
+Description=Binance Futures Trading Signal Bot
+After=network.target
+
+[Service]
+Type=simple
+User=bot
+WorkingDirectory=/home/bot/bot-telegram
+Environment="PATH=/home/bot/bot-telegram/venv/bin"
+ExecStart=/home/bot/bot-telegram/venv/bin/python -m bot.main
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=append:/var/log/trading-bot/output.log
+StandardError=append:/var/log/trading-bot/error.log
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
