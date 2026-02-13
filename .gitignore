@@ -47,3 +47,6 @@ Thumbs.db
 # Config
 config.local.py
 .env
+
+# Keep .env.example
+!.env.example

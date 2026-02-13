@@ -8,9 +8,13 @@ Type=simple
 User=trader
 Group=trader
 WorkingDirectory=/home/trader/bot-telegram
-Environment="TELEGRAM_BOT_TOKEN=your_bot_token_here"
-Environment="TELEGRAM_CHAT_ID=your_chat_id_here"
-Environment="LOG_LEVEL=INFO"
+
+# Load environment variables from secure file
+# Create /home/trader/bot-telegram/.env with:
+# TELEGRAM_BOT_TOKEN=your_bot_token_here
+# TELEGRAM_CHAT_ID=your_chat_id_here
+# LOG_LEVEL=INFO
+EnvironmentFile=/home/trader/bot-telegram/.env
 
 # Python executable (adjust path as needed)
 ExecStart=/usr/bin/python3 -m bot.main

@@ -3,7 +3,7 @@ Premium/Discount Engine - Determines price positioning relative to range
 """
 import logging
 from collections import deque
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from . import config
 

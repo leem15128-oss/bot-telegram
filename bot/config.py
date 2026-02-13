@@ -19,7 +19,10 @@ FIXED_SYMBOLS = [
 ]
 
 # Symbol rotation and subscription limits
-MAX_SYMBOLS_SUBSCRIBED = 40  # Max concurrent subscriptions for VPS stability
+# Max concurrent subscriptions for VPS stability
+# 40 chosen based on: 180 streams/conn limit, 3 timeframes = 60 symbols max per conn
+# Using 40 provides comfortable margin and works well on 1-2GB RAM VPS
+MAX_SYMBOLS_SUBSCRIBED = 40
 TOP_VOLUME_COUNT = 300  # Top volume symbols to track
 SYMBOL_ROTATION_INTERVAL = 30 * 60  # 30 minutes in seconds
 UNIVERSE_REFRESH_INTERVAL = 6 * 60 * 60  # 6 hours in seconds

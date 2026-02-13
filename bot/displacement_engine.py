@@ -3,7 +3,7 @@ Displacement Engine - Validates impulse moves and displacement
 """
 import logging
 from collections import deque
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from . import config
 from .utils import (

@@ -288,7 +288,9 @@ async def safe_close_session(session: aiohttp.ClientSession):
         logger.warning(f"Error closing session: {e}")
 
 
-def chunks(lst: List, n: int) -> List[List]:
+from typing import Generator
+
+def chunks(lst: List, n: int) -> Generator[List, None, None]:
     """Yield successive n-sized chunks from lst"""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]

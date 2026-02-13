@@ -200,9 +200,12 @@ class AdaptiveMemory:
             self.consecutive_losses += 1
         
         # Update drawdown (simplified)
+        # Losses add to drawdown, wins reduce it partially
+        # Win recovery multiplier is 0.5 because we only partially close positions at TP1
+        WIN_RECOVERY_MULTIPLIER = 0.5
         self.current_drawdown = max(0, self.current_drawdown + r_multiple)
         if r_multiple > 0:
-            self.current_drawdown = max(0, self.current_drawdown - r_multiple * 0.5)
+            self.current_drawdown = max(0, self.current_drawdown - r_multiple * WIN_RECOVERY_MULTIPLIER)
         
         # Apply rules
         self._apply_global_rules()
