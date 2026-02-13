@@ -2,6 +2,8 @@
 
 Advanced trading bot implementing ICT/SMC (Institutional/Smart Money Concepts) methodology for cryptocurrency futures trading.
 
+> 📖 **[Quick Start Guide](QUICKSTART.md)** | **[Implementation Details](IMPLEMENTATION.md)**
+
 ## Features
 
 ### Core Trading Logic
