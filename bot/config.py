@@ -16,6 +16,13 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 # Options: "default" (standard format) or "vip" (Vietnamese VIP format)
 MESSAGE_TEMPLATE = os.getenv("MESSAGE_TEMPLATE", "default")
 
+# ===== NOTIFICATION CONTROL =====
+# Control which notifications are sent to Telegram
+SEND_STARTUP_MESSAGE = os.getenv("SEND_STARTUP_MESSAGE", "true").lower() == "true"
+SEND_STATS_ON_STARTUP = os.getenv("SEND_STATS_ON_STARTUP", "false").lower() == "true"
+SEND_STATS_ON_SHUTDOWN = os.getenv("SEND_STATS_ON_SHUTDOWN", "true").lower() == "true"
+STARTUP_MESSAGE_COOLDOWN_MINUTES = int(os.getenv("STARTUP_MESSAGE_COOLDOWN_MINUTES", "5"))
+
 # ===== TIMEFRAMES =====
 # Multi-timeframe analysis: 30m for entry, 1h for setup, 4h for regime
 TIMEFRAMES = ["30m", "1h", "4h"]

@@ -5,6 +5,8 @@ Sends formatted trading signals to Telegram.
 
 import logging
 import requests
+import os
+import time
 from typing import Dict, Optional, List
 import bot.config as config
 
@@ -22,6 +24,16 @@ VIETNAMESE_PATTERN_LABELS = {
     'evening_star': 'Mẫu hình sao hôm',
     'three_white_soldiers': 'Ba Người Lính Trắng',
     'three_black_crows': 'Ba Con Quạ Đen',
+    'tweezer_top': 'Mẫu hình kẹp trên',
+    'tweezer_bottom': 'Mẫu hình kẹp dưới',
+    'bullish_harami': 'Harami tăng',
+    'bearish_harami': 'Harami giảm',
+    'doji': 'Nến Doji',
+    'dragonfly_doji': 'Doji chuồn chuồn',
+    'gravestone_doji': 'Doji bia mộ',
+    'inside_bar': 'Inside bar',
+    'momentum_bullish': 'Nến momentum tăng',
+    'momentum_bearish': 'Nến momentum giảm',
 }
 
 
@@ -283,13 +295,23 @@ Tồn tại để kiếm tiền</i>
             structure_reason = component_scores['structure'].get('reason', '')
             if structure_score >= 60:
                 if 'broke_resistance' in structure_reason:
-                    reasons.append("Phá vỡ kháng cự (BOS)")
+                    if 'strong_volume' in structure_reason:
+                        reasons.append("Phá vỡ kháng cự mạnh với khối lượng cao (Breakout)")
+                    else:
+                        reasons.append("Phá vỡ kháng cự (Breakout)")
                 elif 'broke_support' in structure_reason:
-                    reasons.append("Phá vỡ hỗ trợ (BOS)")
+                    if 'strong_volume' in structure_reason:
+                        reasons.append("Phá vỡ hỗ trợ mạnh với khối lượng cao (Breakdown)")
+                    else:
+                        reasons.append("Phá vỡ hỗ trợ (Breakdown)")
                 elif 'at_support' in structure_reason:
                     reasons.append("Tại vùng hỗ trợ mạnh")
                 elif 'at_resistance' in structure_reason:
                     reasons.append("Tại vùng kháng cự mạnh")
+                elif 'near_support' in structure_reason:
+                    reasons.append("Gần vùng hỗ trợ")
+                elif 'near_resistance' in structure_reason:
+                    reasons.append("Gần vùng kháng cự")
                 else:
                     reasons.append("Cấu trúc thị trường hỗ trợ")
         
@@ -419,6 +441,16 @@ Tồn tại để kiếm tiền</i>
         Returns:
             True if sent successfully
         """
+        # Check if startup messages are disabled
+        if not config.SEND_STARTUP_MESSAGE:
+            logger.info("Startup message disabled via config")
+            return False
+        
+        # Check cooldown to prevent spam on rapid restarts
+        if not self._check_startup_cooldown():
+            logger.info("Startup message skipped due to cooldown")
+            return False
+        
         message = f"""
 🤖 <b>Trading Signal Bot Started</b>
 
@@ -434,7 +466,42 @@ Tồn tại để kiếm tiền</i>
 ✅ Bot is now monitoring markets...
         """.strip()
         
-        return self._send_message(message)
+        success = self._send_message(message)
+        if success:
+            self._update_startup_timestamp()
+        return success
+    
+    def _check_startup_cooldown(self) -> bool:
+        """
+        Check if enough time has passed since last startup message.
+        
+        Returns:
+            True if cooldown has passed, False if still in cooldown
+        """
+        timestamp_file = '.last_startup_message'
+        cooldown_seconds = config.STARTUP_MESSAGE_COOLDOWN_MINUTES * 60
+        
+        try:
+            if os.path.exists(timestamp_file):
+                with open(timestamp_file, 'r') as f:
+                    last_startup = float(f.read().strip())
+                    elapsed = time.time() - last_startup
+                    if elapsed < cooldown_seconds:
+                        logger.debug(f"Startup cooldown active: {int(cooldown_seconds - elapsed)}s remaining")
+                        return False
+        except (IOError, ValueError) as e:
+            logger.warning(f"Error reading startup timestamp: {e}")
+        
+        return True
+    
+    def _update_startup_timestamp(self):
+        """Update the last startup message timestamp."""
+        timestamp_file = '.last_startup_message'
+        try:
+            with open(timestamp_file, 'w') as f:
+                f.write(str(time.time()))
+        except IOError as e:
+            logger.warning(f"Error writing startup timestamp: {e}")
     
     def send_stats_update(self, stats: Dict) -> bool:
         """

@@ -195,9 +195,15 @@ class TradingBot:
         logger.info("Starting Trading Signal Bot")
         logger.info("=" * 60)
         
-        # Send startup notification
+        # Send startup notification (if enabled)
         config_summary = config.get_config_summary()
-        self.telegram.send_startup_message(config_summary)
+        if config.SEND_STARTUP_MESSAGE:
+            self.telegram.send_startup_message(config_summary)
+        
+        # Send startup stats (if enabled)
+        if config.SEND_STATS_ON_STARTUP:
+            stats = self.trade_tracker.get_stats()
+            self.telegram.send_stats_update(stats)
         
         # Load historical data
         await self.load_historical_data()
@@ -220,9 +226,12 @@ class TradingBot:
         if self.ws_handler:
             await self.ws_handler.stop()
         
-        # Send final stats
+        # Get final stats
         stats = self.trade_tracker.get_stats()
-        self.telegram.send_stats_update(stats)
+        
+        # Send final stats (if enabled)
+        if config.SEND_STATS_ON_SHUTDOWN:
+            self.telegram.send_stats_update(stats)
         
         logger.info("Bot stopped successfully")
         logger.info(f"Final stats: {stats}")
