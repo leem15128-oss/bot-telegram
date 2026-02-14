@@ -64,6 +64,7 @@ TELEGRAM_CHAT_ID=your_telegram_chat_id
 # Optional Settings
 LOG_LEVEL=INFO
 DATABASE_PATH=bot_data.db
+MESSAGE_TEMPLATE=default  # Options: "default" or "vip" (Vietnamese VIP format)
 ```
 
 4. **Get Telegram credentials**:
@@ -134,6 +135,10 @@ REGIME_TIMEFRAME = "4h"      # Main trend
 
 ## Signal Format
 
+The bot supports two message templates configured via `MESSAGE_TEMPLATE` environment variable:
+
+### Default Template (MESSAGE_TEMPLATE=default)
+
 Signals sent to Telegram include:
 - **Symbol & Direction**: e.g., BTCUSDT - LONG
 - **Setup Type**: Continuation or Reversal
@@ -170,6 +175,50 @@ Score: 72.5/100
 
 ⚠️ Alert only - not financial advice
 ```
+
+### VIP Template (MESSAGE_TEMPLATE=vip)
+
+Vietnamese VIP format with:
+- **BUY/LONG or SELL/SHORT**: Direction indicator
+- **Setup**: Vietnamese setup description
+- **Entry (Vào lệnh)**: Entry price
+- **SL**: Stop loss
+- **TP1/TP2/TP3**: Three take profit targets based on support/resistance levels
+- **RR**: Risk:Reward ratio
+- **Lý do vào kèo**: Vietnamese reasons list (derived from component analysis)
+- **Trailing**: Trailing stop guidance
+- **Footer**: "Nguồn: Posiya Tú" / "Tồn tại để kiếm tiền"
+
+Example:
+```
+🟢 BTCUSDT - BUY/LONG
+Setup: Nến Nhấn Chìm Tăng
+
+Vào lệnh: 45250.0000
+SL: 44800.0000
+TP1: 45800.0000
+TP2: 46400.0000
+TP3: 47000.0000
+RR: 1:3.89
+
+Lý do vào kèo:
+  • Xu hướng 4h, 1h, 30m đồng thuận
+  • Phá vỡ kháng cú (BOS)
+  • Nến nhấn chìm tăng
+  • Momentum tăng mạnh
+  • Khối lượng tăng mạnh
+
+Trailing: Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo
+
+Nguồn: Posiya Tú
+Tồn tại để kiếm tiền
+```
+
+**TP Target Calculation:**
+- The bot finds up to 3 support/resistance levels based on swing points
+- For LONG: Uses resistance levels above entry as TP1/TP2/TP3
+- For SHORT: Uses support levels below entry as TP1/TP2/TP3
+- If fewer than 3 SR levels are found, falls back to RR-based targets (1R, 2R, 3R)
 
 ## Supported Candlestick Patterns
 
