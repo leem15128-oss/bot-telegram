@@ -247,24 +247,6 @@ Trailing: Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BO
 Nguồn: Posiya Tú
 Tồn tại để kiếm tiền
 ```
-SL: 44800.0000
-TP1: 45800.0000
-TP2: 46400.0000
-TP3: 47000.0000
-RR: 1:3.89
-
-Lý do vào kèo:
-  • Xu hướng 4h, 1h, 30m đồng thuận
-  • Phá vỡ kháng cự (BOS)
-  • Nến nhấn chìm tăng
-  • Momentum tăng mạnh
-  • Khối lượng tăng mạnh
-
-Trailing: Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo
-
-Nguồn: Posiya Tú
-Tồn tại để kiếm tiền
-```
 
 **TP Target Calculation:**
 - The bot finds up to 3 support/resistance levels based on swing points

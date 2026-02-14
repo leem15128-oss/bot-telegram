@@ -226,12 +226,15 @@ class TradingBot:
         if self.ws_handler:
             await self.ws_handler.stop()
         
+        # Get final stats
+        stats = self.trade_tracker.get_stats()
+        
         # Send final stats (if enabled)
         if config.SEND_STATS_ON_SHUTDOWN:
-            stats = self.trade_tracker.get_stats()
             self.telegram.send_stats_update(stats)
         
         logger.info("Bot stopped successfully")
+        logger.info(f"Final stats: {stats}")
 
 
 async def main():
