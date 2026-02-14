@@ -269,6 +269,58 @@ class DataManager:
         
         return nearest_support, nearest_resistance
     
+    def find_multiple_sr_levels(self, symbol: str, timeframe: str, 
+                               current_price: float, atr: float, 
+                               direction: str, max_levels: int = 3) -> List[float]:
+        """
+        Find multiple support or resistance levels for take profit targets.
+        
+        Args:
+            symbol: Trading symbol
+            timeframe: Timeframe
+            current_price: Current price
+            atr: Average True Range
+            direction: 'long' (find resistances) or 'short' (find supports)
+            max_levels: Maximum number of levels to return
+        
+        Returns:
+            List of SR levels sorted by distance from current price
+        """
+        candles = self.get_closed_candles(symbol, timeframe)
+        
+        if len(candles) < 20:
+            return []
+        
+        # Find recent swing highs and lows
+        highs = []
+        lows = []
+        
+        for i in range(5, len(candles) - 5):
+            # Check if local high
+            is_high = all(candles[i].high >= candles[j].high 
+                         for j in range(i-5, i+5) if j != i)
+            if is_high:
+                highs.append(candles[i].high)
+            
+            # Check if local low
+            is_low = all(candles[i].low <= candles[j].low 
+                        for j in range(i-5, i+5) if j != i)
+            if is_low:
+                lows.append(candles[i].low)
+        
+        zone_width = atr * config.SR_ZONE_WIDTH_ATR
+        
+        if direction == 'long':
+            # Find resistance levels above current price
+            levels = [level for level in sorted(highs) 
+                     if level > current_price + zone_width]
+            return levels[:max_levels]
+        else:
+            # Find support levels below current price
+            levels = [level for level in sorted(lows, reverse=True) 
+                     if level < current_price - zone_width]
+            return levels[:max_levels]
+    
     def get_stats(self) -> dict:
         """Get statistics about stored data."""
         stats = {}

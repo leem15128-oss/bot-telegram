@@ -5,7 +5,7 @@ Sends formatted trading signals to Telegram.
 
 import logging
 import requests
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import bot.config as config
 
 logger = logging.getLogger(__name__)
@@ -76,6 +76,22 @@ class TelegramNotifier:
         Returns:
             Formatted message string
         """
+        # Check if VIP template is enabled
+        if config.MESSAGE_TEMPLATE == "vip":
+            return self._format_vip_message(signal)
+        else:
+            return self._format_default_message(signal)
+    
+    def _format_default_message(self, signal: Dict) -> str:
+        """
+        Format signal in default English format.
+        
+        Args:
+            signal: Signal dictionary
+        
+        Returns:
+            Formatted message string
+        """
         # Emoji for direction
         direction_emoji = "🟢" if signal['direction'] == 'long' else "🔴"
         setup_emoji = "📈" if signal['setup_type'] == 'continuation' else "🔄"
@@ -122,6 +138,225 @@ class TelegramNotifier:
         """.strip()
         
         return message
+    
+    def _format_vip_message(self, signal: Dict) -> str:
+        """
+        Format signal in Vietnamese VIP format.
+        
+        Args:
+            signal: Signal dictionary
+        
+        Returns:
+            Formatted message string in Vietnamese VIP style
+        """
+        # Determine direction and setup labels in Vietnamese
+        direction = signal['direction']
+        setup_type = signal['setup_type']
+        
+        if direction == 'long':
+            direction_label = "BUY/LONG"
+            direction_emoji = "🟢"
+        else:
+            direction_label = "SELL/SHORT"
+            direction_emoji = "🔴"
+        
+        # Map setup type to Vietnamese
+        setup_label = self._get_vietnamese_setup_label(setup_type, signal.get('component_scores', {}))
+        
+        # Calculate R:R ratio
+        entry = signal['entry']
+        stop = signal['stop_loss']
+        tp1 = signal.get('tp1', signal['take_profit'])
+        tp2 = signal.get('tp2', signal['take_profit'])
+        tp3 = signal.get('tp3', signal['take_profit'])
+        
+        risk = abs(entry - stop)
+        reward = abs(tp3 - entry)
+        rr_ratio = reward / risk if risk > 0 else 0
+        
+        # Build reasons list from component scores
+        reasons = self._build_vietnamese_reasons(signal, direction)
+        reasons_text = '\n'.join([f"  • {reason}" for reason in reasons])
+        
+        # Trailing guidance
+        trailing_text = self._get_trailing_guidance(direction)
+        
+        # Build VIP message
+        message = f"""
+{direction_emoji} <b>{signal['symbol']}</b> - {direction_label}
+<b>Setup:</b> {setup_label}
+
+<b>Vào lệnh:</b> {entry:.4f}
+<b>SL:</b> {stop:.4f}
+<b>TP1:</b> {tp1:.4f}
+<b>TP2:</b> {tp2:.4f}
+<b>TP3:</b> {tp3:.4f}
+<b>RR:</b> 1:{rr_ratio:.2f}
+
+<b>Lý do vào kèo:</b>
+{reasons_text}
+
+<b>Trailing:</b> {trailing_text}
+
+<i>Nguồn: Posiya Tú
+Tồn tại để kiếm tiền</i>
+        """.strip()
+        
+        return message
+    
+    def _get_vietnamese_setup_label(self, setup_type: str, component_scores: Dict) -> str:
+        """
+        Get Vietnamese label for setup type based on patterns and structure.
+        
+        Args:
+            setup_type: 'continuation' or 'reversal'
+            component_scores: Component scores dictionary
+        
+        Returns:
+            Vietnamese setup label
+        """
+        # Check for specific patterns
+        patterns = []
+        if 'candle_patterns' in component_scores:
+            patterns = component_scores['candle_patterns'].get('patterns', [])
+        
+        # Map common patterns to Vietnamese labels
+        pattern_labels = {
+            'bullish_engulfing': 'Nến Nhấn Chìm Tăng',
+            'bearish_engulfing': 'Nến Nhấn Chìm Giảm',
+            'hammer': 'Nến Búa',
+            'shooting_star': 'Sao Băng',
+            'morning_star': 'Sao Mai',
+            'evening_star': 'Sao Hôm',
+            'three_white_soldiers': 'Ba Người Lính Trắng',
+            'three_black_crows': 'Ba Con Quạ Đen',
+        }
+        
+        # If we have a strong pattern, use it
+        for pattern in patterns:
+            if pattern in pattern_labels:
+                return pattern_labels[pattern]
+        
+        # Otherwise use setup type
+        if setup_type == 'continuation':
+            return 'Tiếp Diễn Xu Hướng'
+        elif setup_type == 'reversal':
+            return 'Đảo Chiều'
+        else:
+            return 'Tín Hiệu Giao Dịch'
+    
+    def _build_vietnamese_reasons(self, signal: Dict, direction: str) -> List[str]:
+        """
+        Build Vietnamese reasons list from component scores.
+        
+        Args:
+            signal: Signal dictionary
+            direction: 'long' or 'short'
+        
+        Returns:
+            List of Vietnamese reasons
+        """
+        reasons = []
+        component_scores = signal.get('component_scores', {})
+        trends = signal.get('trends', {})
+        
+        # Trend alignment
+        if 'trend_alignment' in component_scores:
+            trend_score = component_scores['trend_alignment']['score']
+            if trend_score >= 70:
+                aligned_tfs = []
+                expected_trend = 'up' if direction == 'long' else 'down'
+                if trends.get('4h') == expected_trend:
+                    aligned_tfs.append('4h')
+                if trends.get('1h') == expected_trend:
+                    aligned_tfs.append('1h')
+                if trends.get('30m') == expected_trend:
+                    aligned_tfs.append('30m')
+                if aligned_tfs:
+                    reasons.append(f"Xu hướng {', '.join(aligned_tfs)} đồng thuận")
+        
+        # Structure/BOS
+        if 'structure' in component_scores:
+            structure_score = component_scores['structure']['score']
+            structure_reason = component_scores['structure'].get('reason', '')
+            if structure_score >= 60:
+                if 'broke_resistance' in structure_reason:
+                    reasons.append("Phá vỡ kháng cự (BOS)")
+                elif 'broke_support' in structure_reason:
+                    reasons.append("Phá vỡ hỗ trợ (BOS)")
+                elif 'at_support' in structure_reason:
+                    reasons.append("Tại vùng hỗ trợ mạnh")
+                elif 'at_resistance' in structure_reason:
+                    reasons.append("Tại vùng kháng cự mạnh")
+                else:
+                    reasons.append("Cấu trúc thị trường hỗ trợ")
+        
+        # Candle patterns
+        if 'candle_patterns' in component_scores:
+            patterns = component_scores['candle_patterns'].get('patterns', [])
+            if patterns:
+                pattern_names = {
+                    'bullish_engulfing': 'Nến nhấn chìm tăng',
+                    'bearish_engulfing': 'Nến nhấn chìm giảm',
+                    'hammer': 'Mẫu hình búa',
+                    'shooting_star': 'Mẫu hình sao băng',
+                    'pin_bar_bullish': 'Pin bar tăng',
+                    'pin_bar_bearish': 'Pin bar giảm',
+                    'morning_star': 'Mẫu hình sao mai',
+                    'evening_star': 'Mẫu hình sao hôm',
+                }
+                for pattern in patterns[:2]:  # Limit to top 2 patterns
+                    if pattern in pattern_names:
+                        reasons.append(pattern_names[pattern])
+        
+        # Momentum
+        if 'momentum' in component_scores:
+            momentum_score = component_scores['momentum']['score']
+            if momentum_score >= 70:
+                if direction == 'long':
+                    reasons.append("Momentum tăng mạnh")
+                else:
+                    reasons.append("Momentum giảm mạnh")
+        
+        # Trendline
+        if 'trendline' in component_scores:
+            trendline_score = component_scores['trendline']['score']
+            trendline_reason = component_scores['trendline'].get('reason', '')
+            if trendline_score >= 60:
+                if 'support' in trendline_reason.lower():
+                    reasons.append("Trendline hỗ trợ")
+                elif 'resistance' in trendline_reason.lower():
+                    reasons.append("Trendline kháng cự")
+                elif 'break' in trendline_reason.lower():
+                    reasons.append("Phá vỡ trendline")
+        
+        # Volume confirmation
+        volume_ratio = signal.get('volume_ratio', 1.0)
+        if volume_ratio >= 1.5:
+            reasons.append("Khối lượng tăng mạnh")
+        
+        # If no reasons found, add generic ones
+        if not reasons:
+            reasons.append("Tín hiệu kỹ thuật phù hợp")
+            if signal.get('score', 0) >= 75:
+                reasons.append("Điểm số tổng thể cao")
+        
+        return reasons
+    
+    def _get_trailing_guidance(self, direction: str) -> str:
+        """
+        Get trailing stop guidance in Vietnamese.
+        
+        Args:
+            direction: 'long' or 'short'
+        
+        Returns:
+            Trailing guidance text
+        """
+        if direction == 'long':
+            return "Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo"
+        else:
+            return "Dời SL xuống BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo"
     
     def _trend_emoji(self, trend: str) -> str:
         """Get emoji for trend direction."""
