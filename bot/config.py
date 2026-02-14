@@ -16,6 +16,13 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 # Options: "default" (standard format) or "vip" (Vietnamese VIP format)
 MESSAGE_TEMPLATE = os.getenv("MESSAGE_TEMPLATE", "default")
 
+# Minimum Risk:Reward ratio for signals (only signals with RR >= this value will be sent)
+RR_MIN = float(os.getenv("RR_MIN", "1.2"))
+
+# Timeframes to display in VIP message trend confirmation section (comma-separated)
+# Example: "30m,1h,4h" or "15m,1h,4h,1d"
+SIGNAL_TIMEFRAMES = os.getenv("SIGNAL_TIMEFRAMES", "30m,1h,4h").split(",")
+
 # ===== NOTIFICATION CONTROL =====
 # Control which notifications are sent to Telegram
 SEND_STARTUP_MESSAGE = os.getenv("SEND_STARTUP_MESSAGE", "true").lower() == "true"
