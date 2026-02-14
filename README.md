@@ -203,7 +203,7 @@ RR: 1:3.89
 
 Lý do vào kèo:
   • Xu hướng 4h, 1h, 30m đồng thuận
-  • Phá vỡ kháng cú (BOS)
+  • Phá vỡ kháng cự (BOS)
   • Nến nhấn chìm tăng
   • Momentum tăng mạnh
   • Khối lượng tăng mạnh
