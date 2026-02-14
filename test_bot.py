@@ -38,6 +38,7 @@ def test_candle_patterns():
     print_section("Candle Pattern Detection Test")
     
     detector = CandlePatternDetector()
+    atr = 5.0
     
     # Test bullish engulfing
     bearish_candle = Candle(105, 106, 102, 103, 1000)
@@ -53,9 +54,61 @@ def test_candle_patterns():
     
     # Test momentum candle
     momentum = Candle(100, 110, 99, 109, 2000)
-    atr = 5.0
     is_momentum = detector.detect_momentum_candle_bullish(momentum, atr)
     print(f"✓ Momentum candle detected: {is_momentum}")
+    
+    # Test new patterns from PR #4
+    
+    # Test doji
+    doji = Candle(100, 105, 95, 100.2, 1000)  # Very small body
+    is_doji = detector.detect_doji(doji, atr)
+    print(f"✓ Doji pattern detected: {is_doji}")
+    
+    # Test dragonfly doji
+    dragonfly = Candle(100, 100.5, 95, 100.3, 1000)  # Long lower wick, small body
+    is_dragonfly = detector.detect_dragonfly_doji(dragonfly, atr)
+    print(f"✓ Dragonfly doji detected: {is_dragonfly}")
+    
+    # Test gravestone doji
+    gravestone = Candle(100, 105, 99.5, 99.7, 1000)  # Long upper wick, small body
+    is_gravestone = detector.detect_gravestone_doji(gravestone, atr)
+    print(f"✓ Gravestone doji detected: {is_gravestone}")
+    
+    # Test bullish harami
+    large_bearish = Candle(110, 111, 100, 101, 1500)
+    small_bullish = Candle(104, 106, 103, 105, 800)
+    is_harami = detector.detect_bullish_harami(large_bearish, small_bullish, atr)
+    print(f"✓ Bullish harami detected: {is_harami}")
+    
+    # Test tweezer bottom
+    bear1 = Candle(105, 106, 95, 96, 1000)
+    bull1 = Candle(96, 102, 95.2, 101, 1000)  # Similar lows
+    is_tweezer = detector.detect_tweezer_bottom(bear1, bull1, atr)
+    print(f"✓ Tweezer bottom detected: {is_tweezer}")
+    
+    # Test morning star (3 candles)
+    c1 = Candle(110, 111, 100, 101, 1500)  # Long bearish
+    c2 = Candle(100, 101, 99, 100.5, 500)  # Small star
+    c3 = Candle(101, 110, 100, 109, 1500)  # Long bullish
+    candles_ms = [c1, c2, c3]
+    is_morning_star = detector.detect_morning_star(candles_ms, atr)
+    print(f"✓ Morning star detected: {is_morning_star}")
+    
+    # Test three white soldiers
+    s1 = Candle(100, 105, 99, 104, 1200)
+    s2 = Candle(103, 108, 102, 107, 1300)
+    s3 = Candle(106, 111, 105, 110, 1400)
+    soldiers = [s1, s2, s3]
+    is_soldiers = detector.detect_three_white_soldiers(soldiers, atr)
+    print(f"✓ Three white soldiers detected: {is_soldiers}")
+    
+    # Test pattern scoring
+    test_candles = [
+        Candle(100, 105, 95, 96, 1000),
+        Candle(96, 102, 95, 101, 1200)
+    ]
+    score, patterns = detector.score_pattern_confirmation(test_candles, 'long', atr)
+    print(f"✓ Pattern scoring: score={score}, patterns={patterns}")
 
 def test_risk_manager():
     """Test risk management."""

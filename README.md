@@ -14,7 +14,11 @@ A sophisticated multi-timeframe technical analysis bot for generating quality tr
 1. **Trend Alignment** (25 pts): Multi-timeframe trend confirmation
 2. **Structure Analysis** (20 pts): Support/resistance, breakout quality, volume confirmation
 3. **Momentum** (15 pts): Price action strength and direction
-4. **Candle Patterns** (15 pts): Engulfing, pin bars, hammers, shooting stars, momentum candles, fakeouts
+4. **Candle Patterns** (15 pts): 20+ patterns including:
+   - **Reversal**: Engulfing, Hammer, Shooting Star, Pin Bars, Morning/Evening Star, Harami, Tweezers
+   - **Continuation**: Three White Soldiers, Three Black Crows, Momentum Candles
+   - **Indecision**: Doji (Standard, Long-Legged, Dragonfly, Gravestone)
+   - **Special**: Inside Bar, Fakeout Detection
 5. **Trendline Detection** (15 pts): Lightweight pivot-based trendline analysis
 6. **Risk/Reward** (10 pts): Automatic stop loss and take profit calculation
 
@@ -166,6 +170,43 @@ Score: 72.5/100
 
 ⚠️ Alert only - not financial advice
 ```
+
+## Supported Candlestick Patterns
+
+The bot includes 20+ ATR-normalized candlestick patterns for signal confirmation:
+
+### Reversal Patterns (Bullish)
+- **Bullish Engulfing**: Large bullish candle engulfs previous bearish candle (30 pts)
+- **Hammer**: Small body at top with long lower wick (25 pts)
+- **Pin Bar Bullish**: Long lower wick rejection (20 pts)
+- **Morning Star**: 3-candle reversal with gap down star (25 pts)
+- **Bullish Harami**: Small bullish candle inside large bearish body (18 pts)
+- **Tweezer Bottom**: Two candles with matching lows, second bullish (15 pts)
+- **Dragonfly Doji**: Long lower shadow, minimal upper shadow (15 pts)
+
+### Reversal Patterns (Bearish)
+- **Bearish Engulfing**: Large bearish candle engulfs previous bullish candle (30 pts)
+- **Shooting Star**: Small body at bottom with long upper wick (25 pts)
+- **Pin Bar Bearish**: Long upper wick rejection (20 pts)
+- **Evening Star**: 3-candle reversal with gap up star (25 pts)
+- **Bearish Harami**: Small bearish candle inside large bullish body (18 pts)
+- **Tweezer Top**: Two candles with matching highs, second bearish (15 pts)
+- **Gravestone Doji**: Long upper shadow, minimal lower shadow (15 pts)
+
+### Continuation Patterns
+- **Three White Soldiers**: Three consecutive strong bullish candles (30 pts)
+- **Three Black Crows**: Three consecutive strong bearish candles (30 pts)
+- **Momentum Candle**: Large body relative to ATR (25 pts)
+
+### Indecision Patterns
+- **Long-Legged Doji**: Small body with very long shadows both ways (10 pts)
+- **Standard Doji**: Very small body, shows indecision (5 pts)
+
+### Special Patterns
+- **Inside Bar**: Current candle range within previous candle (10 pts)
+- **Fakeout**: Wick breaks level but closes back inside (30 pts)
+
+All patterns use ATR normalization for volatility-independent detection and support intrabar confirmation.
 
 ## Architecture
 
