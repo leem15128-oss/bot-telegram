@@ -55,12 +55,15 @@ This document verifies that all requirements from the problem statement have bee
 
 | Requirement | Status | Implementation |
 |------------|--------|----------------|
-| Engulfing patterns | ✅ | Lines 74-88, 90-104: Bullish/bearish engulfing |
-| Pin bar / hammer / shooting star | ✅ | Lines 106-151: Multiple pin bar patterns |
-| Inside bar | ✅ | Lines 177-185: Inside bar detection |
-| Momentum candle | ✅ | Lines 187-213: Momentum detection |
-| Fakeout detection | ✅ | Lines 215-234: Fakeout pattern |
-| Integration into scoring | ✅ | `scoring_engine.py` Lines 121-138: Pattern scoring |
+| Reversal patterns (Bullish) | ✅ | Engulfing, Hammer, Pin Bar, Morning Star, Harami, Tweezer Bottom, Dragonfly Doji |
+| Reversal patterns (Bearish) | ✅ | Engulfing, Shooting Star, Pin Bar, Evening Star, Harami, Tweezer Top, Gravestone Doji |
+| Continuation patterns | ✅ | Three White Soldiers, Three Black Crows, Momentum Candles |
+| Indecision patterns | ✅ | Standard Doji, Long-Legged Doji |
+| Special patterns | ✅ | Inside Bar, Fakeout Detection |
+| ATR normalization | ✅ | All patterns use ATR for volatility-independent detection |
+| Multi-candle patterns | ✅ | Support for 2-3 candle patterns (Star patterns, Soldiers/Crows) |
+| Integration into scoring | ✅ | `scoring_engine.py`: Pattern scoring with configurable weights |
+| Total patterns | ✅ | 20+ candlestick patterns implemented |
 
 ### 7. Trendline Detection (bot/trendline_detector.py)
 
@@ -87,9 +90,9 @@ This document verifies that all requirements from the problem statement have bee
 | Module | Lines | Purpose | Status |
 |--------|-------|---------|--------|
 | config.py | 152 | Configuration | ✅ |
-| candle_patterns.py | 376 | Pattern detection | ✅ |
+| candle_patterns.py | 627 | Pattern detection (20+ patterns) | ✅ |
 | trendline_detector.py | 272 | Trendline analysis | ✅ |
-| scoring_engine.py | 331 | Multi-component scoring | ✅ |
+| scoring_engine.py | 305 | Multi-component scoring | ✅ |
 | signal_deduplicator.py | 221 | Anti-spam controls | ✅ |
 | risk_manager.py | 165 | Risk management | ✅ |
 | data_manager.py | 275 | Data storage | ✅ |
@@ -98,14 +101,14 @@ This document verifies that all requirements from the problem statement have bee
 | telegram_notifier.py | 206 | Notifications | ✅ |
 | websocket_handler.py | 265 | WebSocket | ✅ |
 | main.py | 237 | Orchestration | ✅ |
-| **Total** | **2,956** | **Complete bot** | **✅** |
+| **Total** | **~3,237** | **Complete bot** | **✅** |
 
 ### Testing
 
 | Test Category | Status | Details |
 |--------------|--------|---------|
 | Configuration | ✅ | All parameters validated |
-| Pattern Detection | ✅ | All 8+ patterns tested |
+| Pattern Detection | ✅ | All 20+ patterns tested (reversal, continuation, indecision) |
 | Risk Manager | ✅ | Unlimited mode verified |
 | Deduplicator | ✅ | Cooldowns working |
 | Data Manager | ✅ | Multi-timeframe storage |

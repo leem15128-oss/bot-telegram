@@ -64,15 +64,16 @@ This document summarizes the complete implementation of the Telegram Trading Sig
 ### 6. Candle Pattern Analysis (`bot/candle_patterns.py`)
 
 **Implemented:**
-- ✅ **Engulfing patterns**: Bullish and bearish
-- ✅ **Pin bars**: Bullish and bearish with configurable wick ratios
-- ✅ **Hammer**: Bullish reversal pattern
-- ✅ **Shooting star**: Bearish reversal pattern
-- ✅ **Inside bar**: Consolidation pattern
-- ✅ **Momentum candles**: Strong directional moves
-- ✅ **Fakeout detection**: Wick through level + close back inside
+- ✅ **Reversal patterns (Bullish)**: Bullish Engulfing, Hammer, Pin Bar, Morning Star, Bullish Harami, Tweezer Bottom, Dragonfly Doji
+- ✅ **Reversal patterns (Bearish)**: Bearish Engulfing, Shooting Star, Pin Bar, Evening Star, Bearish Harami, Tweezer Top, Gravestone Doji
+- ✅ **Continuation patterns**: Three White Soldiers, Three Black Crows, Momentum Candles
+- ✅ **Indecision patterns**: Standard Doji, Long-Legged Doji
+- ✅ **Special patterns**: Inside Bar, Fakeout Detection
+- ✅ **Total**: 20+ ATR-normalized candlestick patterns
 - ✅ Pattern scoring integrated into `scoring_engine.py`
 - ✅ ATR calculation for volatility-based analysis
+- ✅ Support for multi-candle patterns (2-3 candles)
+- ✅ Intrabar confirmation support
 
 ### 7. Trendline Detection (`bot/trendline_detector.py`)
 
@@ -122,9 +123,10 @@ The bot uses a 100-point scoring system with weighted components:
    - All thresholds and parameters
    - Environment variable integration
 
-2. **`bot/candle_patterns.py`** (376 lines)
+2. **`bot/candle_patterns.py`** (627 lines)
    - Candle class with calculated properties
-   - Pattern detector with 8+ patterns
+   - Pattern detector with 20+ patterns (reversal, continuation, indecision)
+   - Multi-candle pattern support (2-3 candles)
    - Scoring logic for confirmations
    - ATR calculation
 
