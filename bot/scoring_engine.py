@@ -247,12 +247,10 @@ class ScoringEngine:
         # 4. Candle patterns
         pattern_score = 50  # Default neutral
         patterns = []
-        if len(candles_30m) >= 2:
-            prev_candle = candles_30m[-2]
-            current_candle = candles_30m[-1]
+        if len(candles_30m) >= 1:
             nearby_level = nearest_support if direction == 'long' else nearest_resistance
             pattern_score, patterns = self.pattern_detector.score_pattern_confirmation(
-                prev_candle, current_candle, direction, atr, nearby_level
+                candles_30m, direction, atr, nearby_level
             )
         
         component_scores['candle_patterns'] = {
