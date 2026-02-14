@@ -245,30 +245,44 @@ class TradingStrategy:
         
         # If we have SR levels, use them
         if len(sr_levels) >= 3:
-            return (sr_levels[0], sr_levels[1], sr_levels[2])
+            tp1, tp2, tp3 = sr_levels[0], sr_levels[1], sr_levels[2]
         elif len(sr_levels) == 2:
             # Use 2 SR levels + RR-based TP3
             tp3 = entry + (3 * risk) if direction == 'long' else entry - (3 * risk)
-            return (sr_levels[0], sr_levels[1], tp3)
+            tp1, tp2 = sr_levels[0], sr_levels[1]
         elif len(sr_levels) == 1:
             # Use 1 SR level + RR-based TP2 and TP3
             tp2 = entry + (2 * risk) if direction == 'long' else entry - (2 * risk)
             tp3 = entry + (3 * risk) if direction == 'long' else entry - (3 * risk)
-            return (sr_levels[0], tp2, tp3)
+            tp1 = sr_levels[0]
         else:
             # Fallback to RR-based targets (1R, 2R, 3R)
             if direction == 'long':
-                return (
-                    entry + (1 * risk),
-                    entry + (2 * risk),
-                    entry + (3 * risk)
-                )
+                tp1 = entry + (1 * risk)
+                tp2 = entry + (2 * risk)
+                tp3 = entry + (3 * risk)
             else:
-                return (
-                    entry - (1 * risk),
-                    entry - (2 * risk),
-                    entry - (3 * risk)
-                )
+                tp1 = entry - (1 * risk)
+                tp2 = entry - (2 * risk)
+                tp3 = entry - (3 * risk)
+        
+        # Validate TP ordering
+        if direction == 'long':
+            # For long, ensure TP1 < TP2 < TP3 and all > entry
+            if not (entry < tp1 < tp2 < tp3):
+                logger.warning(f"TP ordering invalid for LONG, using RR-based fallback")
+                tp1 = entry + (1 * risk)
+                tp2 = entry + (2 * risk)
+                tp3 = entry + (3 * risk)
+        else:
+            # For short, ensure TP1 > TP2 > TP3 and all < entry
+            if not (entry > tp1 > tp2 > tp3):
+                logger.warning(f"TP ordering invalid for SHORT, using RR-based fallback")
+                tp1 = entry - (1 * risk)
+                tp2 = entry - (2 * risk)
+                tp3 = entry - (3 * risk)
+        
+        return (tp1, tp2, tp3)
     
     def _format_component_scores(self, component_scores: Dict) -> str:
         """Format component scores for logging."""

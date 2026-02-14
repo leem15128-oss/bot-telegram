@@ -10,6 +10,20 @@ import bot.config as config
 
 logger = logging.getLogger(__name__)
 
+# Vietnamese pattern name mappings
+VIETNAMESE_PATTERN_LABELS = {
+    'bullish_engulfing': 'Nến nhấn chìm tăng',
+    'bearish_engulfing': 'Nến nhấn chìm giảm',
+    'hammer': 'Mẫu hình búa',
+    'shooting_star': 'Mẫu hình sao băng',
+    'pin_bar_bullish': 'Pin bar tăng',
+    'pin_bar_bearish': 'Pin bar giảm',
+    'morning_star': 'Mẫu hình sao mai',
+    'evening_star': 'Mẫu hình sao hôm',
+    'three_white_soldiers': 'Ba Người Lính Trắng',
+    'three_black_crows': 'Ba Con Quạ Đen',
+}
+
 
 class TelegramNotifier:
     """
@@ -220,22 +234,10 @@ Tồn tại để kiếm tiền</i>
         if 'candle_patterns' in component_scores:
             patterns = component_scores['candle_patterns'].get('patterns', [])
         
-        # Map common patterns to Vietnamese labels
-        pattern_labels = {
-            'bullish_engulfing': 'Nến Nhấn Chìm Tăng',
-            'bearish_engulfing': 'Nến Nhấn Chìm Giảm',
-            'hammer': 'Nến Búa',
-            'shooting_star': 'Sao Băng',
-            'morning_star': 'Sao Mai',
-            'evening_star': 'Sao Hôm',
-            'three_white_soldiers': 'Ba Người Lính Trắng',
-            'three_black_crows': 'Ba Con Quạ Đen',
-        }
-        
         # If we have a strong pattern, use it
         for pattern in patterns:
-            if pattern in pattern_labels:
-                return pattern_labels[pattern]
+            if pattern in VIETNAMESE_PATTERN_LABELS:
+                return VIETNAMESE_PATTERN_LABELS[pattern]
         
         # Otherwise use setup type
         if setup_type == 'continuation':
@@ -295,19 +297,9 @@ Tồn tại để kiếm tiền</i>
         if 'candle_patterns' in component_scores:
             patterns = component_scores['candle_patterns'].get('patterns', [])
             if patterns:
-                pattern_names = {
-                    'bullish_engulfing': 'Nến nhấn chìm tăng',
-                    'bearish_engulfing': 'Nến nhấn chìm giảm',
-                    'hammer': 'Mẫu hình búa',
-                    'shooting_star': 'Mẫu hình sao băng',
-                    'pin_bar_bullish': 'Pin bar tăng',
-                    'pin_bar_bearish': 'Pin bar giảm',
-                    'morning_star': 'Mẫu hình sao mai',
-                    'evening_star': 'Mẫu hình sao hôm',
-                }
-                for pattern in patterns[:2]:  # Limit to top 2 patterns
-                    if pattern in pattern_names:
-                        reasons.append(pattern_names[pattern])
+                for pattern in patterns[:2]:  # First 2 patterns from the list
+                    if pattern in VIETNAMESE_PATTERN_LABELS:
+                        reasons.append(VIETNAMESE_PATTERN_LABELS[pattern])
         
         # Momentum
         if 'momentum' in component_scores:
