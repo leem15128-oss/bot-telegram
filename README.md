@@ -262,9 +262,9 @@ Example:
 ⚖️ RR: 1:3.89
 
 📊 Xác nhận xu hướng:
-  • 30M: ⬆️ ⬆️ Tăng
-  • 1H: ⬆️ ⬆️ Tăng
-  • 4H: ⬆️ ⬆️ Tăng
+  • 30M: ⬆️ Tăng
+  • 1H: ⬆️ Tăng
+  • 4H: ⬆️ Tăng
 
 🔍 Lý do vào kèo:
   ✅ Xu hướng 4h, 1h, 30m đồng thuận

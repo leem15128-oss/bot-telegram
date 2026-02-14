@@ -225,10 +225,10 @@ class TelegramNotifier:
             trend = trends.get(tf, 'neutral')
             trend_emoji = self._trend_emoji(trend)
             trend_label = {
-                'up': '⬆️ Tăng',
-                'down': '⬇️ Giảm', 
-                'neutral': '➡️ Sideway'
-            }.get(trend, '➡️ Sideway')
+                'up': 'Tăng',
+                'down': 'Giảm', 
+                'neutral': 'Sideway'
+            }.get(trend, 'Sideway')
             trend_lines.append(f"  • <b>{tf.upper()}:</b> {trend_emoji} {trend_label}")
         
         trend_section = f"""
