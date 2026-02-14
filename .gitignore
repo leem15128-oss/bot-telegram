@@ -44,3 +44,4 @@ htmlcov/
 tmp/
 temp/
 *.tmp
+.last_startup_message
