@@ -65,6 +65,12 @@ TELEGRAM_CHAT_ID=your_telegram_chat_id
 LOG_LEVEL=INFO
 DATABASE_PATH=bot_data.db
 MESSAGE_TEMPLATE=default  # Options: "default" or "vip" (Vietnamese VIP format)
+
+# Notification Control
+SEND_STARTUP_MESSAGE=true  # Send notification when bot starts (true/false)
+SEND_STATS_ON_STARTUP=false  # Send statistics on startup (true/false) 
+SEND_STATS_ON_SHUTDOWN=true  # Send statistics on shutdown (true/false)
+STARTUP_MESSAGE_COOLDOWN_MINUTES=5  # Cooldown to prevent spam if bot restarts frequently
 ```
 
 4. **Get Telegram credentials**:
@@ -94,7 +100,29 @@ Press `Ctrl+C` for graceful shutdown
 
 ## Configuration
 
-Edit `bot/config.py` to customize:
+### Notification Controls
+
+The bot provides fine-grained control over Telegram notifications to prevent spam:
+
+```env
+# Control startup notifications
+SEND_STARTUP_MESSAGE=true         # Enable/disable bot startup notification
+SEND_STATS_ON_STARTUP=false       # Send statistics when bot starts (default: off)
+SEND_STATS_ON_SHUTDOWN=true       # Send statistics when bot stops (default: on)
+STARTUP_MESSAGE_COOLDOWN_MINUTES=5  # Prevent duplicate startup messages if bot restarts quickly
+```
+
+**Default behavior:**
+- ✅ Single startup message when bot starts (if enabled)
+- ❌ No statistics message on startup (prevents duplicate notifications)
+- ✅ Statistics message when bot shuts down
+- 🛡️ 5-minute cooldown prevents spam if bot restarts multiple times
+
+**To disable all startup notifications:**
+```env
+SEND_STARTUP_MESSAGE=false
+SEND_STATS_ON_STARTUP=false
+```
 
 ### Signal Thresholds
 ```python
@@ -178,15 +206,21 @@ Score: 72.5/100
 
 ### VIP Template (MESSAGE_TEMPLATE=vip)
 
-Vietnamese VIP format with:
+Vietnamese VIP format with professional styling and detailed analysis:
 - **BUY/LONG or SELL/SHORT**: Direction indicator
-- **Setup**: Vietnamese setup description
+- **Setup**: Vietnamese setup description based on detected patterns
 - **Entry (Vào lệnh)**: Entry price
 - **SL**: Stop loss
 - **TP1/TP2/TP3**: Three take profit targets based on support/resistance levels
 - **RR**: Risk:Reward ratio
-- **Lý do vào kèo**: Vietnamese reasons list (derived from component analysis)
-- **Trailing**: Trailing stop guidance
+- **Lý do vào kèo**: Vietnamese reasons list with enhanced detection:
+  - ✅ Multi-timeframe trend alignment
+  - ✅ **Breakout/Breakdown detection** with volume confirmation
+  - ✅ **False breakout (Fakeout) detection** for reversal setups
+  - ✅ 20+ candlestick patterns (all Vietnamese labels)
+  - ✅ Momentum and trendline analysis
+  - ✅ Volume confirmation
+- **Trailing**: Trailing stop guidance in Vietnamese
 - **Footer**: "Nguồn: Posiya Tú" / "Tồn tại để kiếm tiền"
 
 Example:
@@ -195,6 +229,24 @@ Example:
 Setup: Nến Nhấn Chìm Tăng
 
 Vào lệnh: 45250.0000
+SL: 44800.0000
+TP1: 45800.0000
+TP2: 46400.0000
+TP3: 47000.0000
+RR: 1:3.89
+
+Lý do vào kèo:
+  • Xu hướng 4h, 1h, 30m đồng thuận
+  • Phá vỡ kháng cự mạnh với khối lượng cao (Breakout)
+  • Nến nhấn chìm tăng
+  • Momentum tăng mạnh
+  • Khối lượng tăng mạnh
+
+Trailing: Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo
+
+Nguồn: Posiya Tú
+Tồn tại để kiếm tiền
+```
 SL: 44800.0000
 TP1: 45800.0000
 TP2: 46400.0000
@@ -222,7 +274,34 @@ Tồn tại để kiếm tiền
 
 ## Supported Candlestick Patterns
 
-The bot includes 20+ ATR-normalized candlestick patterns for signal confirmation:
+The bot includes 20+ ATR-normalized candlestick patterns for signal confirmation with **enhanced breakout/breakdown and false breakout (fakeout) detection**:
+
+### Price Action Detection
+
+**Breakout Detection** (detect_breakout):
+- Confirms bullish breakout above resistance levels
+- Evaluates breakout strength based on:
+  - Distance from resistance (in ATR multiples)
+  - Volume confirmation (1.2x to 2.0x+ average volume)
+- Minimum 30 points required for valid breakout
+- Vietnamese label: "Phá vỡ kháng cự mạnh với khối lượng cao (Breakout)"
+
+**Breakdown Detection** (detect_breakdown):
+- Confirms bearish breakdown below support levels
+- Evaluates breakdown strength based on:
+  - Distance from support (in ATR multiples)
+  - Volume confirmation (1.2x to 2.0x+ average volume)
+- Minimum 30 points required for valid breakdown
+- Vietnamese label: "Phá vỡ hỗ trợ mạnh với khối lượng cao (Breakdown)"
+
+**False Breakout Detection** (detect_false_breakout):
+- Detects fakeout patterns where price briefly breaks a level but reverses
+- Bullish fakeout: Price breaks below support, then closes back above
+- Bearish fakeout: Price breaks above resistance, then closes back below
+- Requires significant wick size (>0.3 ATR)
+- Vietnamese labels:
+  - "Fakeout bẫy giảm" (bullish fakeout/failed breakdown)
+  - "Fakeout bẫy tăng" (bearish fakeout/failed breakout)
 
 ### Reversal Patterns (Bullish)
 - **Bullish Engulfing**: Large bullish candle engulfs previous bearish candle (30 pts)
