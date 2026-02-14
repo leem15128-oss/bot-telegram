@@ -24,6 +24,16 @@ VIETNAMESE_PATTERN_LABELS = {
     'evening_star': 'Mẫu hình sao hôm',
     'three_white_soldiers': 'Ba Người Lính Trắng',
     'three_black_crows': 'Ba Con Quạ Đen',
+    'tweezer_top': 'Mẫu hình kẹp trên',
+    'tweezer_bottom': 'Mẫu hình kẹp dưới',
+    'bullish_harami': 'Harami tăng',
+    'bearish_harami': 'Harami giảm',
+    'doji': 'Nến Doji',
+    'dragonfly_doji': 'Doji chuồn chuồn',
+    'gravestone_doji': 'Doji bia mộ',
+    'inside_bar': 'Inside bar',
+    'momentum_bullish': 'Nến momentum tăng',
+    'momentum_bearish': 'Nến momentum giảm',
 }
 
 
@@ -285,13 +295,23 @@ Tồn tại để kiếm tiền</i>
             structure_reason = component_scores['structure'].get('reason', '')
             if structure_score >= 60:
                 if 'broke_resistance' in structure_reason:
-                    reasons.append("Phá vỡ kháng cự (BOS)")
+                    if 'strong_volume' in structure_reason:
+                        reasons.append("Phá vỡ kháng cự mạnh với khối lượng cao (Breakout)")
+                    else:
+                        reasons.append("Phá vỡ kháng cự (Breakout)")
                 elif 'broke_support' in structure_reason:
-                    reasons.append("Phá vỡ hỗ trợ (BOS)")
+                    if 'strong_volume' in structure_reason:
+                        reasons.append("Phá vỡ hỗ trợ mạnh với khối lượng cao (Breakdown)")
+                    else:
+                        reasons.append("Phá vỡ hỗ trợ (Breakdown)")
                 elif 'at_support' in structure_reason:
                     reasons.append("Tại vùng hỗ trợ mạnh")
                 elif 'at_resistance' in structure_reason:
                     reasons.append("Tại vùng kháng cự mạnh")
+                elif 'near_support' in structure_reason:
+                    reasons.append("Gần vùng hỗ trợ")
+                elif 'near_resistance' in structure_reason:
+                    reasons.append("Gần vùng kháng cự")
                 else:
                     reasons.append("Cấu trúc thị trường hỗ trợ")
         

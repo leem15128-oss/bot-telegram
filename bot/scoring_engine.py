@@ -303,3 +303,131 @@ class ScoringEngine:
         total_score = sum(comp['weighted'] for comp in component_scores.values())
         
         return total_score, component_scores
+    
+    def detect_breakout(self, current_price: float, resistance_level: float, 
+                       atr: float, volume_ratio: float = 1.0) -> Tuple[bool, float]:
+        """
+        Detect bullish breakout above resistance.
+        
+        Args:
+            current_price: Current price
+            resistance_level: Resistance level to break
+            atr: Average True Range
+            volume_ratio: Current volume vs average
+        
+        Returns:
+            Tuple of (is_breakout, strength_score)
+        """
+        if current_price <= resistance_level:
+            return False, 0.0
+        
+        # Calculate breakout distance
+        breakout_distance = (current_price - resistance_level) / atr if atr > 0 else 0
+        
+        # Strength based on distance and volume
+        strength = 0.0
+        
+        # Distance strength (0-60 points)
+        if breakout_distance >= 0.5:
+            strength += 60
+        elif breakout_distance >= 0.3:
+            strength += 40
+        elif breakout_distance >= 0.1:
+            strength += 20
+        
+        # Volume confirmation (0-40 points)
+        if volume_ratio >= 2.0:
+            strength += 40
+        elif volume_ratio >= 1.5:
+            strength += 30
+        elif volume_ratio >= 1.2:
+            strength += 20
+        
+        is_breakout = strength >= 30  # Minimum 30 points for valid breakout
+        return is_breakout, strength
+    
+    def detect_breakdown(self, current_price: float, support_level: float,
+                        atr: float, volume_ratio: float = 1.0) -> Tuple[bool, float]:
+        """
+        Detect bearish breakdown below support.
+        
+        Args:
+            current_price: Current price
+            support_level: Support level to break
+            atr: Average True Range
+            volume_ratio: Current volume vs average
+        
+        Returns:
+            Tuple of (is_breakdown, strength_score)
+        """
+        if current_price >= support_level:
+            return False, 0.0
+        
+        # Calculate breakdown distance
+        breakdown_distance = (support_level - current_price) / atr if atr > 0 else 0
+        
+        # Strength based on distance and volume
+        strength = 0.0
+        
+        # Distance strength (0-60 points)
+        if breakdown_distance >= 0.5:
+            strength += 60
+        elif breakdown_distance >= 0.3:
+            strength += 40
+        elif breakdown_distance >= 0.1:
+            strength += 20
+        
+        # Volume confirmation (0-40 points)
+        if volume_ratio >= 2.0:
+            strength += 40
+        elif volume_ratio >= 1.5:
+            strength += 30
+        elif volume_ratio >= 1.2:
+            strength += 20
+        
+        is_breakdown = strength >= 30  # Minimum 30 points for valid breakdown
+        return is_breakdown, strength
+    
+    def detect_false_breakout(self, candles: List[Candle], level: float,
+                             direction: str, atr: float) -> Tuple[bool, str]:
+        """
+        Detect false breakout (fakeout) pattern.
+        Price breaks a level but quickly reverses.
+        
+        Args:
+            candles: Recent candles (at least 2-3)
+            level: The S/R level that was tested
+            direction: 'bullish' for failed breakdown, 'bearish' for failed breakout
+            atr: Average True Range
+        
+        Returns:
+            Tuple of (is_fakeout, description)
+        """
+        if len(candles) < 2:
+            return False, ""
+        
+        # Check last 2 candles for fakeout pattern
+        prev_candle = candles[-2]
+        current_candle = candles[-1]
+        
+        if direction == 'bullish':
+            # Bullish fakeout: Previous candle broke below support, current candle closes above
+            prev_broke_below = prev_candle.low < level
+            current_closes_above = current_candle.close > level
+            
+            if prev_broke_below and current_closes_above:
+                wick_size = level - prev_candle.low
+                if wick_size >= 0.3 * atr:  # Significant wick
+                    return True, f"Fakeout bẫy giảm tại {level:.4f}"
+        
+        elif direction == 'bearish':
+            # Bearish fakeout: Previous candle broke above resistance, current candle closes below
+            prev_broke_above = prev_candle.high > level
+            current_closes_below = current_candle.close < level
+            
+            if prev_broke_above and current_closes_below:
+                wick_size = prev_candle.high - level
+                if wick_size >= 0.3 * atr:  # Significant wick
+                    return True, f"Fakeout bẫy tăng tại {level:.4f}"
+        
+        return False, ""
