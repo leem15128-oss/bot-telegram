@@ -12,6 +12,10 @@ BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET", "")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 
+# ===== MESSAGE TEMPLATE =====
+# Options: "default" (standard format) or "vip" (Vietnamese VIP format)
+MESSAGE_TEMPLATE = os.getenv("MESSAGE_TEMPLATE", "default")
+
 # ===== TIMEFRAMES =====
 # Multi-timeframe analysis: 30m for entry, 1h for setup, 4h for regime
 TIMEFRAMES = ["30m", "1h", "4h"]
