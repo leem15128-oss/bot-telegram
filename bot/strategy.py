@@ -127,8 +127,8 @@ class TradingStrategy:
             entry, stop_loss, direction, symbol, atr
         )
         
-        # Validate risk/reward
-        is_valid, rr_reason = self.risk_manager.validate_setup(entry, stop_loss, take_profit, min_rr=1.5)
+        # Validate risk/reward using configurable RR_MIN
+        is_valid, rr_reason = self.risk_manager.validate_setup(entry, stop_loss, take_profit, min_rr=config.RR_MIN)
         if not is_valid:
             logger.debug(f"{symbol} {direction}: {rr_reason}")
             return None

@@ -167,7 +167,7 @@ class TelegramNotifier:
     
     def _format_vip_message(self, signal: Dict) -> str:
         """
-        Format signal in Vietnamese VIP format.
+        Format signal in Vietnamese VIP format with enhanced icons and structure.
         
         Args:
             signal: Signal dictionary
@@ -178,13 +178,16 @@ class TelegramNotifier:
         # Determine direction and setup labels in Vietnamese
         direction = signal['direction']
         setup_type = signal['setup_type']
+        timeframe = signal.get('timeframe', '30m')
         
         if direction == 'long':
             direction_label = "BUY/LONG"
             direction_emoji = "🟢"
+            direction_arrow = "📈"
         else:
             direction_label = "SELL/SHORT"
             direction_emoji = "🔴"
+            direction_arrow = "📉"
         
         # Map setup type to Vietnamese
         setup_label = self._get_vietnamese_setup_label(setup_type, signal.get('component_scores', {}))
@@ -200,35 +203,68 @@ class TelegramNotifier:
         reward = abs(tp3 - entry)
         rr_ratio = reward / risk if risk > 0 else 0
         
-        # Build reasons list from component scores
+        # Build header with symbol, direction and timeframe
+        header = f"{direction_emoji} <b>{signal['symbol']}</b> - {direction_label} {direction_arrow} [{timeframe.upper()}]"
+        
+        # Build entry/SL/TP section with icons
+        entry_section = f"""
+<b>📌 Setup:</b> {setup_label}
+
+<b>💰 Vào lệnh:</b> {entry:.4f}
+<b>🛑 SL:</b> {stop:.4f}
+<b>🎯 TP1:</b> {tp1:.4f}
+<b>🎯 TP2:</b> {tp2:.4f}
+<b>🎯 TP3:</b> {tp3:.4f}
+<b>⚖️ RR:</b> 1:{rr_ratio:.2f}
+"""
+        
+        # Build trend confirmation section for configured timeframes
+        trends = signal.get('trends', {})
+        trend_lines = []
+        for tf in config.SIGNAL_TIMEFRAMES:
+            trend = trends.get(tf, 'neutral')
+            trend_emoji = self._trend_emoji(trend)
+            trend_label = {
+                'up': '⬆️ Tăng',
+                'down': '⬇️ Giảm', 
+                'neutral': '➡️ Sideway'
+            }.get(trend, '➡️ Sideway')
+            trend_lines.append(f"  • <b>{tf.upper()}:</b> {trend_emoji} {trend_label}")
+        
+        trend_section = f"""
+<b>📊 Xác nhận xu hướng:</b>
+{chr(10).join(trend_lines)}
+"""
+        
+        # Build reasons list from component scores with checkmarks
         reasons = self._build_vietnamese_reasons(signal, direction)
-        reasons_text = '\n'.join([f"  • {reason}" for reason in reasons])
+        reasons_text = '\n'.join([f"  ✅ {reason}" for reason in reasons])
         
-        # Trailing guidance
-        trailing_text = self._get_trailing_guidance(direction)
-        
-        # Build VIP message
-        message = f"""
-{direction_emoji} <b>{signal['symbol']}</b> - {direction_label}
-<b>Setup:</b> {setup_label}
-
-<b>Vào lệnh:</b> {entry:.4f}
-<b>SL:</b> {stop:.4f}
-<b>TP1:</b> {tp1:.4f}
-<b>TP2:</b> {tp2:.4f}
-<b>TP3:</b> {tp3:.4f}
-<b>RR:</b> 1:{rr_ratio:.2f}
-
-<b>Lý do vào kèo:</b>
+        reasons_section = f"""
+<b>🔍 Lý do vào kèo:</b>
 {reasons_text}
-
-<b>Trailing:</b> {trailing_text}
-
-<i>Nguồn: Posiya Tú
-Tồn tại để kiếm tiền</i>
-        """.strip()
+"""
         
-        return message
+        # Build trailing/management section
+        trailing_text = self._get_trailing_guidance(direction)
+        trailing_section = f"""
+<b>📋 Quản lý lệnh / Trailing:</b>
+  • {trailing_text}
+  • Chốt 1/3 tại TP1, 1/3 tại TP2, để TP3 chạy
+  • Không revenge trade nếu hit SL
+"""
+        
+        # Build footer
+        footer = f"""
+<i>━━━━━━━━━━━━━━━━━━━
+💡 Nguồn: Posiya Tú
+💰 Tồn tại để kiếm tiền</i>
+"""
+        
+        # Combine all sections
+        message = f"{header}\n{entry_section}\n{trend_section}\n{reasons_section}\n{trailing_section}\n{footer}"
+        
+        return message.strip()
     
     def _get_vietnamese_setup_label(self, setup_type: str, component_scores: Dict) -> str:
         """
