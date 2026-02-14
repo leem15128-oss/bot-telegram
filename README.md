@@ -65,6 +65,8 @@ TELEGRAM_CHAT_ID=your_telegram_chat_id
 LOG_LEVEL=INFO
 DATABASE_PATH=bot_data.db
 MESSAGE_TEMPLATE=default  # Options: "default" or "vip" (Vietnamese VIP format)
+RR_MIN=1.2  # Minimum Risk:Reward ratio for signals (default: 1.2)
+SIGNAL_TIMEFRAMES=30m,1h,4h  # Timeframes to display in trend confirmation (comma-separated)
 
 # Notification Control
 SEND_STARTUP_MESSAGE=true  # Send notification when bot starts (true/false)
@@ -129,6 +131,21 @@ SEND_STATS_ON_STARTUP=false
 CONTINUATION_MIN_SCORE = 65  # Lower = more signals
 REVERSAL_MIN_SCORE = 70      # Lower = more signals
 ```
+
+### Risk/Reward Filtering
+```env
+RR_MIN=1.2  # Minimum Risk:Reward ratio for signals (default: 1.2)
+```
+Only signals with Risk:Reward ratio >= `RR_MIN` will be sent. This ensures signal quality by filtering out setups with unfavorable risk/reward profiles.
+
+### Message Template Configuration
+```env
+MESSAGE_TEMPLATE=vip  # Options: "default" or "vip"
+SIGNAL_TIMEFRAMES=30m,1h,4h  # Timeframes to display in VIP trend confirmation (comma-separated)
+```
+- `MESSAGE_TEMPLATE=vip`: Use Vietnamese VIP format with enhanced icons and structure
+- `MESSAGE_TEMPLATE=default`: Use standard English format
+- `SIGNAL_TIMEFRAMES`: Controls which timeframes are displayed in the VIP template's trend confirmation section (default: 30m,1h,4h)
 
 ### Daily Limits
 ```python
@@ -206,46 +223,64 @@ Score: 72.5/100
 
 ### VIP Template (MESSAGE_TEMPLATE=vip)
 
-Vietnamese VIP format with professional styling and detailed analysis:
-- **BUY/LONG or SELL/SHORT**: Direction indicator
-- **Setup**: Vietnamese setup description based on detected patterns
-- **Entry (Vào lệnh)**: Entry price
-- **SL**: Stop loss
-- **TP1/TP2/TP3**: Three take profit targets based on support/resistance levels
-- **RR**: Risk:Reward ratio
-- **Lý do vào kèo**: Vietnamese reasons list with enhanced detection:
-  - ✅ Multi-timeframe trend alignment
-  - ✅ **Breakout/Breakdown detection** with volume confirmation
-  - ✅ **False breakout (Fakeout) detection** for reversal setups
-  - ✅ 20+ candlestick patterns (all Vietnamese labels)
-  - ✅ Momentum and trendline analysis
-  - ✅ Volume confirmation
-- **Trailing**: Trailing stop guidance in Vietnamese
-- **Footer**: "Nguồn: Posiya Tú" / "Tồn tại để kiếm tiền"
+Vietnamese VIP format with professional styling, enhanced icons, and detailed analysis:
+- **Header**: Symbol + Direction + Timeframe (e.g., 🟢 BTCUSDT - BUY/LONG 📈 [30M])
+- **Setup**: Vietnamese setup description with 📌 icon
+- **Entry Section** with professional icons:
+  - 💰 **Vào lệnh** (Entry): Entry price
+  - 🛑 **SL** (Stop Loss): Stop loss price
+  - 🎯 **TP1/TP2/TP3**: Three take profit targets based on support/resistance levels
+  - ⚖️ **RR**: Risk:Reward ratio
+- **📊 Xác nhận xu hướng** (Trend Confirmation):
+  - Displays trends for configured timeframes (default: 30m, 1h, 4h)
+  - Each timeframe shows direction with arrows: ⬆️ Tăng, ⬇️ Giảm, ➡️ Sideway
+  - Configurable via `SIGNAL_TIMEFRAMES` environment variable
+- **🔍 Lý do vào kèo** (Entry Reasons) with ✅ checkmarks:
+  - Multi-timeframe trend alignment
+  - **Breakout/Breakdown detection** with volume confirmation
+  - **False breakout (Fakeout) detection** for reversal setups
+  - 20+ candlestick patterns (all Vietnamese labels)
+  - Momentum and trendline analysis
+  - Volume confirmation
+- **📋 Quản lý lệnh / Trailing** (Trade Management):
+  - Detailed trailing stop guidance in Vietnamese
+  - Profit-taking strategy (1/3 at each TP level)
+  - Risk management tips
+- **Footer**: "💡 Nguồn: Posiya Tú / 💰 Tồn tại để kiếm tiền"
 
 Example:
 ```
-🟢 BTCUSDT - BUY/LONG
-Setup: Nến Nhấn Chìm Tăng
+🟢 BTCUSDT - BUY/LONG 📈 [30M]
 
-Vào lệnh: 45250.0000
-SL: 44800.0000
-TP1: 45800.0000
-TP2: 46400.0000
-TP3: 47000.0000
-RR: 1:3.89
+📌 Setup: Nến Nhấn Chìm Tăng
 
-Lý do vào kèo:
-  • Xu hướng 4h, 1h, 30m đồng thuận
-  • Phá vỡ kháng cự mạnh với khối lượng cao (Breakout)
-  • Nến nhấn chìm tăng
-  • Momentum tăng mạnh
-  • Khối lượng tăng mạnh
+💰 Vào lệnh: 45250.0000
+🛑 SL: 44800.0000
+🎯 TP1: 45800.0000
+🎯 TP2: 46400.0000
+🎯 TP3: 47000.0000
+⚖️ RR: 1:3.89
 
-Trailing: Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo
+📊 Xác nhận xu hướng:
+  • 30M: ⬆️ ⬆️ Tăng
+  • 1H: ⬆️ ⬆️ Tăng
+  • 4H: ⬆️ ⬆️ Tăng
 
-Nguồn: Posiya Tú
-Tồn tại để kiếm tiền
+🔍 Lý do vào kèo:
+  ✅ Xu hướng 4h, 1h, 30m đồng thuận
+  ✅ Phá vỡ kháng cự mạnh với khối lượng cao (Breakout)
+  ✅ Nến nhấn chìm tăng
+  ✅ Momentum tăng mạnh
+  ✅ Khối lượng tăng mạnh
+
+📋 Quản lý lệnh / Trailing:
+  • Dời SL lên BOS gần nhất khi chạm TP1, tiếp tục theo SR/BOS tiếp theo
+  • Chốt 1/3 tại TP1, 1/3 tại TP2, để TP3 chạy
+  • Không revenge trade nếu hit SL
+
+━━━━━━━━━━━━━━━━━━━
+💡 Nguồn: Posiya Tú
+💰 Tồn tại để kiếm tiền
 ```
 
 **TP Target Calculation:**
@@ -365,7 +400,7 @@ The bot logs detailed reasons when signals are rejected:
 2. **Cooldown Active**: Too soon after last signal for same symbol/direction/setup
 3. **Daily Limit Reached**: Max signals per day exceeded (if enabled)
 4. **Same-Window Duplicate**: Already sent signal in current 30m candle
-5. **Poor Risk:Reward**: R:R ratio below 1.5
+5. **Poor Risk:Reward**: R:R ratio below RR_MIN (default: 1.2, configurable via environment variable)
 6. **Insufficient Data**: Not enough candles for analysis
 
 Check logs for detailed diagnostic information:
